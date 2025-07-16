@@ -9,7 +9,7 @@ const CitationSection = () => {
   author={Anonymous Authors},
   journal={Under Review},
   year={2025},
-  url={https://anonymous-authors.github.io/MIRRORED-Anims-webpage/}
+  url={https://MIRRORED-Anims.github.io/MIRRORED-Anims/}
 }`
 
   const handleCopy = async () => {

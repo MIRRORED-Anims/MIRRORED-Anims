@@ -4,17 +4,14 @@ const VideoSection = () => {
       <h2 className="section-title">VIDEO</h2>
       
       <div className="video-container">
-        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="text-6xl">🎬</div>
-            <p className="font-mono text-sm text-gray-600 dark:text-gray-400">
-              MAIN_VIDEO.mp4
-            </p>
-            <p className="font-mono text-xs text-gray-500 dark:text-gray-500 max-w-md">
-              [Video will be hosted in repository or on YouTube]
-            </p>
-          </div>
-        </div>
+        <video
+          src="/assets/demo_video.mp4"
+          controls
+          className="w-full h-full object-cover"
+          poster="/assets/video_poster.jpg"
+        >
+          Your browser does not support the video tag.
+        </video>
       </div>
     </section>
   )
