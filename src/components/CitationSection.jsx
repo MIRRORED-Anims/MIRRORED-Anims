@@ -4,11 +4,11 @@ import { Copy, Check } from 'lucide-react'
 const CitationSection = () => {
   const [copied, setCopied] = useState(false)
   
-  const bibtexCitation = `@article{mirrored_anims_2024,
+  const bibtexCitation = `@article{mirrored_anims,
   title={MIRRORED-Anims: Motion Inversion for Rig-space Retargeting to Obtain a Reliable Enlarged Dataset of Character Animations},
   author={Anonymous Authors},
-  journal={Anonymous Conference},
-  year={2024},
+  journal={Under Review},
+  year={2025},
   url={https://anonymous-authors.github.io/MIRRORED-Anims-webpage/}
 }`
 
