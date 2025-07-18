@@ -24,9 +24,24 @@ const CitationSection = () => {
 
   return (
     <section className="space-y-6">
-      <h2 className="section-title">CITE THIS WORK</h2>
+      <h2 className="section-title">CITE_THIS_WORK</h2>
       
-      <div className="section-border bg-gray-50 dark:bg-gray-800 p-6">
+      <div className="section-border bg-gray-50 dark:bg-gray-800 p-6 relative technical-measurements">
+        {/* Technical corner brackets */}
+        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-black dark:border-white z-10"></div>
+        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-black dark:border-white z-10"></div>
+        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-black dark:border-white z-10"></div>
+        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-black dark:border-white z-10"></div>
+        
+        {/* Dimension markers */}
+        <div className="width-marker-left"></div>
+        <div className="width-marker-right"></div>
+        <div className="height-marker-top"></div>
+        <div className="height-marker-bottom"></div>
+        
+        {/* Dimension labels */}
+        <div className="dimension-width">100% WIDTH</div>
+        <div className="dimension-height">AUTO HEIGHT</div>
         <div className="flex items-start justify-between mb-4">
           <h3 className="subsection-title">BibTeX</h3>
           <button
