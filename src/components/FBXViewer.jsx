@@ -39,7 +39,7 @@ class FBXErrorBoundary extends React.Component {
 }
 
 // FBX Character component that loads actual FBX files
-const FBXCharacter = ({ fbxPath, isPlaying, sharedAnimationTime, onAnimationTimeChange, isMainSource }) => {
+const FBXCharacter = ({ fbxPath, isPlaying, sharedAnimationTime, onAnimationTimeChange, isMainSource, onKeyframesChange, characterName, playbackSpeed = 1.0 }) => {
   const fbxRef = useRef();
   const [error, setError] = useState(false);
   const [fbx, setFbx] = useState(null);
@@ -84,14 +84,36 @@ const FBXCharacter = ({ fbxPath, isPlaying, sharedAnimationTime, onAnimationTime
           animationAction.play();
           setAction(animationAction);
           
-          // Report total frames to parent (assuming 30 fps)
-          const duration = loadedFBX.animations[0].duration;
-          const totalFrames = Math.round(duration * 30);
-          if (isMainSource && onTotalFramesChange) {
-            onTotalFramesChange(totalFrames);
+          // Find maximum keyframes from Source animation only
+          let maxKeyframes = 0;
+          if (isMainSource) {
+            try {
+              loadedFBX.animations.forEach((animation, index) => {
+                console.log(`Animation ${index}:`, animation.name, 'tracks:', animation.tracks.length);
+                
+                animation.tracks.forEach((track, trackIndex) => {
+                  const keyframeCount = track.times.length;
+                  console.log(`  Track ${trackIndex} (${track.name}):`, keyframeCount, 'keyframes');
+                  maxKeyframes = Math.max(maxKeyframes, keyframeCount);
+                });
+              });
+              
+              // Report keyframes to parent only from main source
+              if (onKeyframesChange && typeof onKeyframesChange === 'function') {
+                onKeyframesChange(maxKeyframes, characterName);
+              }
+            } catch (error) {
+              console.warn('Error analyzing keyframes:', error);
+              // Fallback to duration-based calculation
+              const duration = loadedFBX.animations[0].duration;
+              maxKeyframes = Math.round(duration * 30);
+              if (onKeyframesChange && typeof onKeyframesChange === 'function') {
+                onKeyframesChange(maxKeyframes, characterName);
+              }
+            }
           }
           
-          console.log('Animation setup complete:', loadedFBX.animations.length, 'animations found, duration:', duration, 'frames:', totalFrames);
+          console.log('Animation setup complete:', loadedFBX.animations.length, 'animations found, max keyframes:', maxKeyframes);
         } else {
           console.log('No animations found in FBX file');
         }
@@ -187,19 +209,21 @@ const FBXCharacter = ({ fbxPath, isPlaying, sharedAnimationTime, onAnimationTime
 
   // Synchronize animation time across all scenes
   useEffect(() => {
-    if (mixer && action && !isMainSource && sharedAnimationTime !== undefined) {
-      // Ensure animation is synchronized
+    if (mixer && action && sharedAnimationTime !== undefined) {
+      // Ensure animation is synchronized for ALL scenes (including main source)
       const duration = action.getClip().duration;
       const normalizedTime = sharedAnimationTime % duration;
       action.time = normalizedTime;
       mixer.update(0); // Update without advancing time
     }
-  }, [sharedAnimationTime, mixer, action, isMainSource]);
+  }, [sharedAnimationTime, mixer, action]);
 
   useFrame((state, delta) => {
     // Update animation mixer
     if (mixer && isPlaying) {
-      mixer.update(delta);
+      // Apply playback speed to delta
+      const adjustedDelta = delta * playbackSpeed;
+      mixer.update(adjustedDelta);
       
       // If this is the main source, broadcast the time to others
       if (isMainSource && action && onAnimationTimeChange) {
@@ -286,12 +310,13 @@ const FBXViewer = ({
   motionUuid,
   onCameraChange,
   onAnimationTimeChange,
-  onTotalFramesChange,
+  onKeyframesChange = null,
   cameraPosition,
   isPlaying = true,
   sharedAnimationTime,
   sharedViewState,
   isMainSource = false,
+  playbackSpeed = 1.0,
   className = '',
   fbxBasePath = '/MIRRORED-Anims/fbx'
 }) => {
@@ -414,6 +439,9 @@ const FBXViewer = ({
                 sharedAnimationTime={sharedAnimationTime}
                 onAnimationTimeChange={onAnimationTimeChange}
                 isMainSource={isMainSource}
+                onKeyframesChange={onKeyframesChange}
+                characterName={characterName}
+                playbackSpeed={playbackSpeed}
               />
             </Suspense>
           </FBXErrorBoundary>

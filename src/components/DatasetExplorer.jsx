@@ -139,6 +139,9 @@ const DatasetExplorer = () => {
   const [totalFrames, setTotalFrames] = useState(100);
   const [animationDuration, setAnimationDuration] = useState(3.33);
   const [animationLoaded, setAnimationLoaded] = useState(false);
+  const [maxKeyframes, setMaxKeyframes] = useState(0);
+  const [loadedKeyframes, setLoadedKeyframes] = useState(new Set());
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
 
   const targetsPerPage = 3;
   const targetCharacters = currentAnimation.characters;
@@ -168,6 +171,10 @@ const DatasetExplorer = () => {
     setAnimationFrame(0);
     setSharedAnimationTime(0);
     setAnimationLoaded(false);
+    setMaxKeyframes(0);
+    setLoadedKeyframes(new Set());
+    setTotalFrames(100);
+    setPlaybackSpeed(1.0);
     // Reset camera position when changing animations
     setSharedCameraPosition(null);
   };
@@ -179,9 +186,11 @@ const DatasetExplorer = () => {
 
   const handleAnimationTimeChange = (time) => {
     setSharedAnimationTime(time);
-    // Update frame slider based on current time and actual duration
-    if (animationDuration > 0) {
-      const currentFrame = Math.round((time / animationDuration) * (totalFrames - 1));
+    // Update frame slider based on current time and actual keyframe count
+    if (totalFrames > 0) {
+      // Calculate frame based on time relative to animation duration
+      // Assuming 30 FPS for frame calculation
+      const currentFrame = Math.round((time * 30) % totalFrames);
       setAnimationFrame(Math.max(0, Math.min(currentFrame, totalFrames - 1)));
     }
   };
@@ -202,9 +211,27 @@ const DatasetExplorer = () => {
     setSharedAnimationTime(timeInSeconds);
   };
 
-  const handleTotalFramesChange = (total) => {
-    setTotalFrames(total);
-    setAnimationLoaded(true);
+  const handlePlaybackSpeedChange = (speed) => {
+    setPlaybackSpeed(speed);
+  };
+
+  const handleKeyframesChange = (keyframes, characterName) => {
+    console.log('Keyframes received:', keyframes, 'for character:', characterName);
+    
+    setLoadedKeyframes(prev => {
+      const newSet = new Set(prev);
+      newSet.add(keyframes);
+      
+      // Update max keyframes if this is higher
+      const currentMax = Math.max(...newSet);
+      setMaxKeyframes(currentMax);
+      setTotalFrames(currentMax);
+      setAnimationLoaded(true);
+      
+      console.log('Updated max keyframes:', currentMax);
+      
+      return newSet;
+    });
   };
 
   const handleDownloadFBX = (characterName) => {
@@ -236,7 +263,7 @@ const DatasetExplorer = () => {
             <p className="font-mono">
               <span className="font-bold">DATASET_SAMPLE:</span> Due to anonymity requirements during the review process, 
               there are currently no ways of storing data in an anonymous manner until the paper is accepted. 
-              As such, this explorer only shows a small sample of the dataset (20 motions picked at random).
+              As such, this explorer only shows a small sample of the dataset (20 motions picked at random), as this is the limit that we could fit inside a GitHub repository.
             </p>
           </div>
         </div>
@@ -290,25 +317,89 @@ const DatasetExplorer = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={togglePlayPause}
-              className="technical-button flex items-center space-x-2"
+              className="technical-button flex items-center space-x-2 min-w-[80px]"
             >
               {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-              <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+              <span className="w-[40px] text-left">{isPlaying ? 'PAUSE' : 'PLAY'}</span>
             </button>
+            
+            {/* Playback Speed Controls */}
+            <div className="flex items-center space-x-1">
+              <span className="font-mono text-xs text-gray-600 dark:text-gray-400">SPEED:</span>
+              <div className="flex border border-black dark:border-white">
+                <button
+                  onClick={() => handlePlaybackSpeedChange(0.25)}
+                  className={`px-2 py-1 text-xs font-mono border-r border-black dark:border-white ${
+                    playbackSpeed === 0.25 
+                      ? 'bg-black dark:bg-white text-white dark:text-black' 
+                      : 'bg-white dark:bg-gray-900 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  0.25x
+                </button>
+                <button
+                  onClick={() => handlePlaybackSpeedChange(0.5)}
+                  className={`px-2 py-1 text-xs font-mono border-r border-black dark:border-white ${
+                    playbackSpeed === 0.5 
+                      ? 'bg-black dark:bg-white text-white dark:text-black' 
+                      : 'bg-white dark:bg-gray-900 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  0.5x
+                </button>
+                <button
+                  onClick={() => handlePlaybackSpeedChange(1.0)}
+                  className={`px-2 py-1 text-xs font-mono ${
+                    playbackSpeed === 1.0 
+                      ? 'bg-black dark:bg-white text-white dark:text-black' 
+                      : 'bg-white dark:bg-gray-900 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  1.0x
+                </button>
+              </div>
+            </div>
             
             <div className="flex-1 flex items-center space-x-3">
               <span className="font-mono text-xs text-gray-600 dark:text-gray-400">FRAME:</span>
-              <input
-                type="range"
-                min="0"
-                max={animationLoaded ? totalFrames - 1 : 99}
-                value={animationFrame}
-                onChange={(e) => handleFrameChange(parseInt(e.target.value))}
-                className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, #000 0%, #000 ${(animationFrame / (animationLoaded ? totalFrames - 1 : 99)) * 100}%, #ccc ${(animationFrame / (animationLoaded ? totalFrames - 1 : 99)) * 100}%, #ccc 100%)`
-                }}
-              />
+              
+              {/* Technical Drawing Style Slider */}
+              <div className="flex-1 relative py-3">
+                {/* Slider track with technical markers */}
+                <div className="relative h-0.5 bg-black dark:bg-white">
+                  {/* Start marker */}
+                  <div className="absolute left-0 top-1/2 w-0.5 h-4 bg-black dark:bg-white transform -translate-y-1/2"></div>
+                  {/* End marker */}
+                  <div className="absolute right-0 top-1/2 w-0.5 h-4 bg-black dark:bg-white transform -translate-y-1/2"></div>
+                  
+                  {/* Progress indicator */}
+                  <div 
+                    className="absolute top-0 left-0 h-0.5 bg-black dark:bg-white"
+                    style={{
+                      width: `${(animationFrame / (animationLoaded ? Math.max(totalFrames - 1, 1) : 99)) * 100}%`
+                    }}
+                  ></div>
+                  
+                  {/* Scrubber circle */}
+                  <div 
+                    className="absolute top-1/2 w-4 h-4 border-2 border-black dark:border-white bg-white dark:bg-gray-900 rounded-full transform -translate-y-1/2 -translate-x-2 cursor-pointer"
+                    style={{
+                      left: `${(animationFrame / (animationLoaded ? Math.max(totalFrames - 1, 1) : 99)) * 100}%`
+                    }}
+                  ></div>
+                </div>
+                
+                {/* Invisible input for interaction */}
+                <input
+                  type="range"
+                  min="0"
+                  max={animationLoaded ? totalFrames - 1 : 99}
+                  value={animationFrame}
+                  onChange={(e) => handleFrameChange(parseInt(e.target.value))}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+              
               <span className="font-mono text-xs text-gray-600 dark:text-gray-400 min-w-[80px]">
                 {animationFrame} / {animationLoaded ? totalFrames - 1 : '...'}
               </span>
@@ -347,13 +438,14 @@ const DatasetExplorer = () => {
               motionUuid={currentAnimation.uuid}
               onCameraChange={handleCameraChange}
               onAnimationTimeChange={handleAnimationTimeChange}
-              onTotalFramesChange={handleTotalFramesChange}
+              onKeyframesChange={handleKeyframesChange}
               onViewChange={handleViewChange}
               isPlaying={isPlaying}
               sharedAnimationTime={sharedAnimationTime}
               sharedViewState={sharedViewState}
               cameraPosition={sharedCameraPosition}
               isMainSource={true}
+              playbackSpeed={playbackSpeed}
               className="aspect-square"
             />
           </div>
@@ -427,6 +519,7 @@ const DatasetExplorer = () => {
                     isPlaying={isPlaying}
                     sharedAnimationTime={sharedAnimationTime}
                     sharedViewState={sharedViewState}
+                    playbackSpeed={playbackSpeed}
                     className="aspect-square"
                   />
                 </div>
@@ -483,6 +576,7 @@ const DatasetExplorer = () => {
                       isPlaying={isPlaying}
                       sharedAnimationTime={sharedAnimationTime}
                       sharedViewState={sharedViewState}
+                      playbackSpeed={playbackSpeed}
                       className="aspect-square"
                       fbxBasePath="/MIRRORED-Anims/mixamo_fbx"
                     />
