@@ -186,11 +186,11 @@ const DatasetExplorer = () => {
 
   const handleAnimationTimeChange = (time) => {
     setSharedAnimationTime(time);
-    // Update frame slider based on current time and actual keyframe count
-    if (totalFrames > 0) {
+    // Update frame slider based on current time and actual duration
+    if (totalFrames > 0 && animationDuration > 0) {
       // Calculate frame based on time relative to animation duration
-      // Assuming 30 FPS for frame calculation
-      const currentFrame = Math.round((time * 30) % totalFrames);
+      const progress = (time % animationDuration) / animationDuration;
+      const currentFrame = Math.round(progress * (totalFrames - 1));
       setAnimationFrame(Math.max(0, Math.min(currentFrame, totalFrames - 1)));
     }
   };
@@ -206,17 +206,25 @@ const DatasetExplorer = () => {
 
   const handleFrameChange = (frame) => {
     setAnimationFrame(frame);
-    // Convert frame to time (assuming 30 fps)
-    const timeInSeconds = frame / 30;
-    setSharedAnimationTime(timeInSeconds);
+    // Convert frame to time based on actual animation duration
+    if (animationDuration > 0 && totalFrames > 0) {
+      const progress = frame / (totalFrames - 1);
+      const timeInSeconds = progress * animationDuration;
+      setSharedAnimationTime(timeInSeconds);
+    }
   };
 
   const handlePlaybackSpeedChange = (speed) => {
     setPlaybackSpeed(speed);
   };
 
-  const handleKeyframesChange = (keyframes, characterName) => {
-    console.log('Keyframes received:', keyframes, 'for character:', characterName);
+  const handleKeyframesChange = (keyframes, characterName, duration) => {
+    console.log('Keyframes received:', keyframes, 'for character:', characterName, 'duration:', duration);
+    
+    // Update animation duration if provided
+    if (duration && duration > 0) {
+      setAnimationDuration(duration);
+    }
     
     setLoadedKeyframes(prev => {
       const newSet = new Set(prev);
@@ -228,7 +236,7 @@ const DatasetExplorer = () => {
       setTotalFrames(currentMax);
       setAnimationLoaded(true);
       
-      console.log('Updated max keyframes:', currentMax);
+      console.log('Updated max keyframes:', currentMax, 'duration:', duration);
       
       return newSet;
     });

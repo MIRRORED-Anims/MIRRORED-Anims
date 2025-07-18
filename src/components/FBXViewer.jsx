@@ -85,35 +85,45 @@ const FBXCharacter = ({ fbxPath, isPlaying, sharedAnimationTime, onAnimationTime
           setAction(animationAction);
           
           // Find maximum keyframes from Source animation only
-          let maxKeyframes = 0;
           if (isMainSource) {
             try {
-              loadedFBX.animations.forEach((animation, index) => {
-                console.log(`Animation ${index}:`, animation.name, 'tracks:', animation.tracks.length);
-                
-                animation.tracks.forEach((track, trackIndex) => {
-                  const keyframeCount = track.times.length;
-                  console.log(`  Track ${trackIndex} (${track.name}):`, keyframeCount, 'keyframes');
-                  maxKeyframes = Math.max(maxKeyframes, keyframeCount);
-                });
+              const firstAnimation = loadedFBX.animations[0];
+              const animationDuration = firstAnimation.duration;
+              let calculatedKeyframes = 0;
+              
+              console.log(`Animation duration: ${animationDuration} seconds`);
+              
+              // Get the maximum keyframe count from all tracks
+              firstAnimation.tracks.forEach((track, trackIndex) => {
+                const keyframeCount = track.times.length;
+                console.log(`  Track ${trackIndex} (${track.name}):`, keyframeCount, 'keyframes');
+                calculatedKeyframes = Math.max(calculatedKeyframes, keyframeCount);
               });
               
-              // Report keyframes to parent only from main source
+              // If we got a very low keyframe count, use duration-based calculation
+              if (calculatedKeyframes < 10) {
+                console.log('Low keyframe count detected, using duration-based calculation');
+                calculatedKeyframes = Math.round(animationDuration * 30); // 30 FPS
+              }
+              
+              console.log(`Final calculated keyframes: ${calculatedKeyframes}`);
+              
+              // Report keyframes and duration to parent
               if (onKeyframesChange && typeof onKeyframesChange === 'function') {
-                onKeyframesChange(maxKeyframes, characterName);
+                onKeyframesChange(calculatedKeyframes, characterName, animationDuration);
               }
             } catch (error) {
               console.warn('Error analyzing keyframes:', error);
               // Fallback to duration-based calculation
               const duration = loadedFBX.animations[0].duration;
-              maxKeyframes = Math.round(duration * 30);
+              const fallbackKeyframes = Math.round(duration * 30);
               if (onKeyframesChange && typeof onKeyframesChange === 'function') {
-                onKeyframesChange(maxKeyframes, characterName);
+                onKeyframesChange(fallbackKeyframes, characterName, duration);
               }
             }
           }
           
-          console.log('Animation setup complete:', loadedFBX.animations.length, 'animations found, max keyframes:', maxKeyframes);
+          console.log('Animation setup complete:', loadedFBX.animations.length, 'animations found');
         } else {
           console.log('No animations found in FBX file');
         }
@@ -210,13 +220,18 @@ const FBXCharacter = ({ fbxPath, isPlaying, sharedAnimationTime, onAnimationTime
   // Synchronize animation time across all scenes
   useEffect(() => {
     if (mixer && action && sharedAnimationTime !== undefined) {
-      // Ensure animation is synchronized for ALL scenes (including main source)
-      const duration = action.getClip().duration;
-      const normalizedTime = sharedAnimationTime % duration;
-      action.time = normalizedTime;
-      mixer.update(0); // Update without advancing time
+      // For non-main source views, always sync to the shared time
+      // For main source, only sync when not playing (during scrubbing)
+      const shouldSync = !isMainSource || !isPlaying;
+      
+      if (shouldSync) {
+        const duration = action.getClip().duration;
+        const normalizedTime = sharedAnimationTime % duration;
+        action.time = normalizedTime;
+        mixer.update(0); // Update without advancing time
+      }
     }
-  }, [sharedAnimationTime, mixer, action]);
+  }, [sharedAnimationTime, mixer, action, isPlaying, isMainSource]);
 
   useFrame((state, delta) => {
     // Update animation mixer
