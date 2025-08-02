@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Your task is to create a research webpage for a project. It will be hosted on GitHub Pages, so there is no backend available, it's only frontend.
+
+This project is called "MIRRORED-Anims: Motion Inversion for Rig-space Retargeting to Obtain a Reliable Enlarged Dataset of Character Animations".
+
+There are several sections that we want this webpage to display, from top to bottom:
+- Title, authors (Anonymous Authors and Anonymous Institutions)
+- Video (only a video hosted in the repository or on YouTube)
+- Abstract (only the text of the abstract)
+- Overview (only a figure)
+- Results highlights (a set of several videos)
+- Control Rig (a button to download the .blend file containing the rig, a ThreeJS interactive demo that we'll build later)
+- Dataset (a way to explore the dataset, that we'll build later)
+- Cite this work (only a BibTex citation format)
+
+Also add a button in the top right corder to switch from light mode to dark mode.
+
+For the visuals, you must take inspiration from the project given as input. I really like this style and would like to see it applied throughout the whole webpage.

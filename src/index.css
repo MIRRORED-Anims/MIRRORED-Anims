@@ -1,0 +1,351 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-white text-black antialiased;
+  }
+}
+
+/* Technical grid background matching sdp-viewer */
+.technical-grid {
+  background-image: 
+    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.technical-grid.dark {
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+}
+
+/* Technical corner brackets */
+.technical-corners {
+  position: relative;
+}
+
+.technical-corners::before,
+.technical-corners::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #000;
+  z-index: 10;
+}
+
+.technical-corners::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.technical-corners::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Additional corner elements for all 4 corners */
+.technical-corners-all {
+  position: relative;
+}
+
+.technical-corners-all::before,
+.technical-corners-all::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #000;
+  z-index: 10;
+}
+
+.technical-corners-all::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.technical-corners-all::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Extra corners using pseudo-elements on child elements */
+.technical-corners-all > *:first-child::before,
+.technical-corners-all > *:first-child::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #000;
+  z-index: 10;
+}
+
+.technical-corners-all > *:first-child::before {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.technical-corners-all > *:first-child::after {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+}
+
+/* Dimension lines */
+.dimension-line {
+  position: relative;
+}
+
+.dimension-line::before,
+.dimension-line::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 1px;
+  background: #666;
+}
+
+.dimension-line::before {
+  left: -8px;
+}
+
+.dimension-line::after {
+  right: -8px;
+}
+
+/* Technical section styling */
+.section-border {
+  @apply border-2 border-black dark:border-white bg-white dark:bg-gray-900 relative;
+}
+
+/* Technical measurements with proper dimension lines */
+.technical-measurements {
+  position: relative;
+}
+
+/* Bottom dimension line (width) */
+.technical-measurements::before {
+  content: '';
+  position: absolute;
+  bottom: -25px;
+  left: 2px;
+  right: 2px;
+  height: 0.5px;
+  background: #ccc;
+  z-index: 3;
+}
+
+/* Left dimension line (height) */
+.technical-measurements::after {
+  content: '';
+  position: absolute;
+  left: -25px;
+  top: 2px;
+  bottom: 2px;
+  width: 0.5px;
+  background: #ccc;
+  z-index: 3;
+}
+
+.dark .technical-measurements::before,
+.dark .technical-measurements::after {
+  background: #555;
+}
+
+/* End markers for width dimension */
+.technical-measurements .width-marker-left {
+  position: absolute;
+  bottom: -28px;
+  left: 2px;
+  width: 0.5px;
+  height: 6px;
+  background: #ccc;
+  z-index: 4;
+}
+
+.technical-measurements .width-marker-right {
+  position: absolute;
+  bottom: -28px;
+  right: 2px;
+  width: 0.5px;
+  height: 6px;
+  background: #ccc;
+  z-index: 4;
+}
+
+/* End markers for height dimension */
+.technical-measurements .height-marker-top {
+  position: absolute;
+  left: -28px;
+  top: 2px;
+  width: 6px;
+  height: 0.5px;
+  background: #ccc;
+  z-index: 4;
+}
+
+.technical-measurements .height-marker-bottom {
+  position: absolute;
+  left: -28px;
+  bottom: 2px;
+  width: 6px;
+  height: 0.5px;
+  background: #ccc;
+  z-index: 4;
+}
+
+/* Width dimension text - BELOW horizontal bar */
+.technical-measurements .dimension-width {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #ccc;
+  z-index: 5;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Height dimension text - LEFT of vertical bar */
+.technical-measurements .dimension-height {
+  position: absolute;
+  left: -75px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #ccc;
+  z-index: 5;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.dark .technical-measurements .dimension-width,
+.dark .technical-measurements .dimension-height {
+  color: #555;
+}
+
+.dark .technical-measurements .width-marker-left,
+.dark .technical-measurements .width-marker-right,
+.dark .technical-measurements .height-marker-top,
+.dark .technical-measurements .height-marker-bottom {
+  background: #555;
+}
+
+/* Right side dimension lines and text */
+.technical-measurements-right::after {
+  left: auto;
+  right: -25px;
+  top: 2px;
+  bottom: 2px;
+}
+
+.technical-measurements-right .height-marker-top {
+  left: auto;
+  right: -28px;
+  top: 2px;
+}
+
+.technical-measurements-right .height-marker-bottom {
+  left: auto;
+  right: -28px;
+  bottom: 2px;
+}
+
+.technical-measurements-right .dimension-height {
+  left: auto;
+  right: -75px;
+}
+
+
+.technical-button {
+  @apply px-4 py-2 font-mono text-sm border-2 border-black dark:border-white 
+         bg-white dark:bg-gray-900 text-black dark:text-white 
+         hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black
+         transition-all duration-200 font-medium;
+}
+
+.video-container {
+  @apply relative w-full overflow-hidden section-border;
+  aspect-ratio: 16 / 9;
+}
+
+.abstract-box {
+  @apply p-6 section-border bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+}
+
+@layer components {
+  .nav-button {
+    @apply px-3 py-2 font-mono text-sm border border-black dark:border-white
+           bg-white dark:bg-gray-900 text-black dark:text-white 
+           hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black
+           transition-colors;
+  }
+  
+  .section-title {
+    @apply text-2xl font-bold font-mono tracking-wide 
+           text-black dark:text-white mb-6 relative;
+  }
+  
+  .section-title::before {
+    content: '';
+    counter-increment: section-counter;
+    position: absolute;
+    left: -80px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 1px;
+    background: #000;
+  }
+  
+  .section-title::after {
+    content: counter(section-counter, decimal-leading-zero);
+    position: absolute;
+    left: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #000;
+    font-weight: normal;
+  }
+  
+  .dark .section-title::before {
+    background: #fff;
+  }
+  
+  .dark .section-title::after {
+    color: #fff;
+  }
+  
+  .subsection-title {
+    @apply text-lg font-semibold font-mono tracking-wide 
+           text-gray-800 dark:text-gray-200 mb-4;
+  }
+} 
