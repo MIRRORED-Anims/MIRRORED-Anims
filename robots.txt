@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://anonymous-authors.github.io/MIRRORED-Anims/sitemap.xml 
